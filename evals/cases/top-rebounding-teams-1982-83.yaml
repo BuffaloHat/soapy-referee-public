@@ -1,0 +1,57 @@
+id: top-rebounding-teams-1982-83
+question: Which two teams averaged the most rebounds per game in the 1982-83 regular season, to one decimal place?
+
+tier: trap
+traps: [era-nulls, home-away-split, season-encoding]
+expects: rows
+cardinality: 2
+
+# Rebounds per team-game from both halves of the schedule. 46 team-games in
+# 1982-83 have no recorded rebounds; an average is over games that have one.
+gold_sql: |
+  WITH team_games AS (
+      SELECT team_id_home AS team_id, reb_home AS reb
+      FROM nba.game WHERE season_id = '21982'
+      UNION ALL
+      SELECT team_id_away, reb_away
+      FROM nba.game WHERE season_id = '21982'
+  )
+  SELECT team_id, round(avg(reb), 1) AS rebounds_per_game
+  FROM team_games
+  GROUP BY team_id
+  ORDER BY avg(reb) DESC
+  LIMIT 2
+
+# Same answer without a union: pick the side per row, and divide by the count
+# of recorded games explicitly rather than relying on avg().
+check_sql: |
+  WITH team_games AS (
+      SELECT t.team_id,
+             CASE WHEN g.team_id_home = t.team_id THEN g.reb_home ELSE g.reb_away END AS reb
+      FROM nba.game g
+      JOIN (SELECT DISTINCT team_id_home AS team_id FROM nba.game WHERE season_id = '21982') t
+        ON t.team_id IN (g.team_id_home, g.team_id_away)
+      WHERE g.season_id = '21982'
+  )
+  SELECT team_id, round(sum(reb) / count(reb), 1)
+  FROM team_games
+  GROUP BY team_id
+  ORDER BY sum(reb) / count(reb) DESC
+  LIMIT 2
+
+contract:
+  ordered: true
+  decimals: 1
+  teams: [team_id]
+
+provenance: >
+  Two independent queries agree: Philadelphia 47.9, San Antonio 46.9. Philadelphia leading is consistent with the 1982-83 76ers
+  (Moses Malone's first season, the champions); the averages themselves were
+  not checked against a published source.
+
+notes: >
+  The trap is counting unrecorded rebounds as zero. sum(reb) / count(*) keeps
+  Philadelphia first but puts Boston (46.5) second and drops San Antonio to
+  45.8 — plausible numbers, no error. Two rows are asked for because the
+  leader is the same either way. Originally top three; cut to two because
+  Boston (46.54) and Chicago (46.51) tie at 46.5 for third.

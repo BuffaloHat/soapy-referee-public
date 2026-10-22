@@ -1,0 +1,43 @@
+id: all-star-average-score
+question: What is the average combined score (both teams' points) of NBA All-Star Games, to one decimal place?
+
+tier: trap
+traps: [all-star-spelling, duplicate-rows]
+expects: rows
+cardinality: 1
+
+# 56 All-Star games are stored twice (once per spelling of season_type), with
+# identical scores. Averaging rows weights those games double.
+gold_sql: |
+  SELECT round(avg(total_points), 1) AS avg_combined_score
+  FROM (
+      SELECT DISTINCT game_id, pts_home + pts_away AS total_points
+      FROM nba.game
+      WHERE season_id LIKE '3%'
+  )
+
+# Same answer grouping by game date — one All-Star game per date — and
+# dividing a sum by a count instead of using avg().
+check_sql: |
+  WITH games AS (
+      SELECT game_date, max(pts_home + pts_away) AS total_points
+      FROM nba.game
+      WHERE season_type IN ('All Star', 'All-Star')
+      GROUP BY game_date
+  )
+  SELECT round(sum(total_points) / count(*), 1)
+  FROM games
+
+contract:
+  decimals: 1
+
+provenance: >
+  Two independent queries agree on 260.0 over the 72 games in the snapshot.
+  The game count matches the published record (see all-star-game-count);
+  no published figure for the average was used.
+
+notes: >
+  The subtle version of the duplicate trap. Averaging every row gives 259.8,
+  one spelling alone gives 260.4 or 259.2 — all plausible, no error. The
+  question asks for one decimal because at whole points 259.8 rounds to the
+  gold 260 and the trap disappears.

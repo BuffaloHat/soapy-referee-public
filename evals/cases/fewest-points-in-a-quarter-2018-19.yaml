@@ -1,0 +1,60 @@
+id: fewest-points-in-a-quarter-2018-19
+question: What was the fewest points a team scored in a single quarter of a 2018-19 regular-season game, and which team was it?
+
+tier: trap
+traps: [mixed-storage-types, home-away-split]
+expects: rows
+cardinality: 1
+
+# line_score's quarter columns are mixed: some are TEXT, some INTEGER. Every
+# quarter value is cast to an integer before comparing. Regular-season
+# 2018-19 game ids start 00218.
+gold_sql: |
+  WITH quarters AS (
+      SELECT team_id_home AS team_id, CAST(pts_qtr1_home AS INTEGER) AS pts FROM nba.line_score WHERE game_id LIKE '00218%'
+      UNION ALL SELECT team_id_home, CAST(pts_qtr2_home AS INTEGER) FROM nba.line_score WHERE game_id LIKE '00218%'
+      UNION ALL SELECT team_id_home, CAST(pts_qtr3_home AS INTEGER) FROM nba.line_score WHERE game_id LIKE '00218%'
+      UNION ALL SELECT team_id_home, CAST(pts_qtr4_home AS INTEGER) FROM nba.line_score WHERE game_id LIKE '00218%'
+      UNION ALL SELECT team_id_away, CAST(pts_qtr1_away AS INTEGER) FROM nba.line_score WHERE game_id LIKE '00218%'
+      UNION ALL SELECT team_id_away, CAST(pts_qtr2_away AS INTEGER) FROM nba.line_score WHERE game_id LIKE '00218%'
+      UNION ALL SELECT team_id_away, CAST(pts_qtr3_away AS INTEGER) FROM nba.line_score WHERE game_id LIKE '00218%'
+      UNION ALL SELECT team_id_away, CAST(pts_qtr4_away AS INTEGER) FROM nba.line_score WHERE game_id LIKE '00218%'
+  )
+  SELECT team_id, pts AS fewest_points
+  FROM quarters
+  ORDER BY pts
+  LIMIT 1
+
+# Same answer per team-game with LEAST() over the four quarters, then the
+# overall minimum.
+check_sql: |
+  WITH team_games AS (
+      SELECT team_id_home AS team_id,
+             least(CAST(pts_qtr1_home AS INTEGER), CAST(pts_qtr2_home AS INTEGER),
+                   CAST(pts_qtr3_home AS INTEGER), CAST(pts_qtr4_home AS INTEGER)) AS low
+      FROM nba.line_score WHERE game_id LIKE '00218%'
+      UNION ALL
+      SELECT team_id_away,
+             least(CAST(pts_qtr1_away AS INTEGER), CAST(pts_qtr2_away AS INTEGER),
+                   CAST(pts_qtr3_away AS INTEGER), CAST(pts_qtr4_away AS INTEGER))
+      FROM nba.line_score WHERE game_id LIKE '00218%'
+  )
+  SELECT team_id, low
+  FROM team_games
+  WHERE low = (SELECT min(low) FROM team_games)
+
+contract:
+  teams: [team_id]
+
+provenance: >
+  Two independent queries agree: Chicago, 7 points in the third quarter at
+  Houston on November 3, 2018. The minimum is unique that season, and the
+  game's quarters (28 + 28 + 7 + 25) sum to its final score of 88.
+
+notes: >
+  The trap is text comparison. Combining the quarter columns without casting
+  yields text, and in text order '10' sorts before '7' — so a naive MIN()
+  returns 10, a believable number, with no error. It returns 10 in every
+  season checked, whatever the true minimum. MAX() hides the trap in modern
+  seasons: when every value has two digits, text and numeric order agree.
+  line_score covers about 90% of games; the answer is over the games it has.

@@ -1,0 +1,85 @@
+id: biggest-improvements
+question: What were the five biggest single-season improvements in regular-season win percentage by an NBA team?
+
+tier: trap
+traps: [missing-seasons, home-away-split, season-encoding]
+expects: rows
+cardinality: 5
+
+# Win percentage per franchise-season from both halves of the schedule, then
+# each season against the one that started a year earlier. The join is on the
+# year, not on row order: seven regular seasons are missing from the snapshot,
+# and row order would pair 2013-14 with 2011-12.
+gold_sql: |
+  WITH team_games AS (
+      SELECT season_id, team_id_home AS team_id, wl_home AS wl
+      FROM nba.game WHERE season_id LIKE '2%'
+      UNION ALL
+      SELECT season_id, team_id_away, wl_away
+      FROM nba.game WHERE season_id LIKE '2%'
+  ),
+  seasons AS (
+      SELECT team_id,
+             CAST(substr(season_id, 2) AS INTEGER) AS season_start,
+             count(*) FILTER (WHERE wl = 'W') / count(*) AS win_pct
+      FROM team_games
+      GROUP BY team_id, season_start
+  )
+  SELECT cur.team_id,
+         cur.season_start,
+         round(cur.win_pct - prev.win_pct, 3) AS improvement
+  FROM seasons cur
+  JOIN seasons prev
+    ON prev.team_id = cur.team_id
+   AND prev.season_start = cur.season_start - 1
+  ORDER BY improvement DESC
+  LIMIT 5
+
+# Same answer with a window function, keeping only truly consecutive seasons,
+# and wins counted from the scores rather than the W/L flag.
+check_sql: |
+  WITH team_games AS (
+      SELECT season_id, team_id_home AS team_id,
+             CASE WHEN pts_home > pts_away THEN 1 ELSE 0 END AS won
+      FROM nba.game WHERE season_id LIKE '2%'
+      UNION ALL
+      SELECT season_id, team_id_away,
+             CASE WHEN pts_away > pts_home THEN 1 ELSE 0 END
+      FROM nba.game WHERE season_id LIKE '2%'
+  ),
+  seasons AS (
+      SELECT team_id,
+             CAST(substr(season_id, 2) AS INTEGER) AS season_start,
+             avg(won) AS win_pct
+      FROM team_games
+      GROUP BY team_id, season_start
+  ),
+  changes AS (
+      SELECT team_id, season_start,
+             win_pct - LAG(win_pct) OVER w AS change,
+             season_start - LAG(season_start) OVER w AS gap
+      FROM seasons
+      WINDOW w AS (PARTITION BY team_id ORDER BY season_start)
+  )
+  SELECT team_id, season_start, round(change, 3)
+  FROM changes
+  WHERE gap = 1
+  ORDER BY change DESC
+  LIMIT 5
+
+contract:
+  ordered: true
+  decimals: 3
+  teams: [team_id]
+  seasons: [season_start]
+
+provenance: >
+  Two independent queries agree. The top result matches the published record:
+  the 2007-08 Celtics went 66-16 after 24-58 the season before (+.512), the
+  largest one-season turnaround in NBA history.
+
+notes: >
+  The trap is the missing 2012-13 regular season. A LAG() over rows with no
+  gap check returns the same top three, then places Charlotte 2013-14 fourth
+  (+.418) by comparing it with 2011-12. Five rows are asked for so the trap
+  is actually tested.

@@ -1,0 +1,15 @@
+# local-docs-r3 plus a prose answer written from the rows (Phase 6).
+# Attempts as in local-docs-r3: table order shuffled from attempt 2 on.
+name: local-docs-r3-answer
+model: qwen2.5-coder:14b
+prompt_version: v1
+schema_mode: docs
+temperature: 0.0
+seed: 0
+repeats: 3
+perturbation: table_order
+max_output_tokens: 512
+# Must comfortably exceed the rendered schema block; Ollama truncates silently.
+num_ctx: 32768
+write_answer: true
+notes: Judge arm. Identical to local-docs-r3 except write_answer.

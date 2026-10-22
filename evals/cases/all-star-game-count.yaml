@@ -1,0 +1,35 @@
+id: all-star-game-count
+question: How many NBA All-Star Games are recorded in the database?
+
+tier: trap
+traps: [all-star-spelling, duplicate-rows]
+expects: rows
+cardinality: 1
+
+# All-Star games carry season_id prefix 3. 56 of them are stored twice, once
+# as 'All Star' and once as 'All-Star', so rows over-count games.
+gold_sql: |
+  SELECT count(DISTINCT game_id) AS all_star_games
+  FROM nba.game
+  WHERE season_id LIKE '3%'
+
+# Same answer by a different route: season_type in either spelling, counted by
+# distinct game date instead of game_id.
+check_sql: |
+  SELECT count(*) AS games
+  FROM (
+      SELECT DISTINCT game_date
+      FROM nba.game
+      WHERE season_type IN ('All Star', 'All-Star')
+  )
+
+provenance: >
+  Two independent queries agree on 72, and it matches the published record:
+  72 NBA All-Star Games were played from 1951 through 2023, with none in
+  1999 (lockout). The snapshot has one per season from 1950-51 to 2022-23,
+  missing only 1998-99.
+
+notes: >
+  Every plausible wrong query returns a believable number, with no error:
+  season_type = 'All Star' gives 65, 'All-Star' gives 63, and either both
+  spellings or season_id LIKE '3%' without DISTINCT gives 128.

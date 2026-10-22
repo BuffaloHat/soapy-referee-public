@@ -1,0 +1,183 @@
+{
+  "run_id": "20261005-211049-local-docs-r3",
+  "started_at": "2026-10-05T21:10:49.499064+00:00",
+  "finished_at": "2026-10-05T21:19:59.659223+00:00",
+  "config": {
+    "name": "local-docs-r3",
+    "model": "qwen2.5-coder:14b",
+    "prompt_version": "v1",
+    "schema_mode": "docs",
+    "temperature": 0.0,
+    "seed": 0,
+    "repeats": 3,
+    "perturbation": "table_order",
+    "max_output_tokens": 512,
+    "num_ctx": 32768,
+    "notes": "Noise-floor arm for local-docs. Attempt 1 is identical to it."
+  },
+  "snapshot_sha256": "65b6412234d2d8817678d04f7cd2548aec82fec02b6c5b86679cade7572c21c7",
+  "git_commit": "849cb45-dirty",
+  "git_dirty": true,
+  "environment": "eval",
+  "case_count": 30,
+  "schema_block_chars": 46312,
+  "schema_orders": {
+    "1": [
+      "common_player_info",
+      "draft_combine_stats",
+      "draft_history",
+      "game",
+      "game_info",
+      "game_summary",
+      "inactive_players",
+      "line_score",
+      "officials",
+      "other_stats",
+      "play_by_play",
+      "player",
+      "team",
+      "team_details",
+      "team_history",
+      "team_info_common"
+    ],
+    "2": [
+      "team",
+      "player",
+      "line_score",
+      "team_details",
+      "inactive_players",
+      "common_player_info",
+      "officials",
+      "game",
+      "other_stats",
+      "game_info",
+      "play_by_play",
+      "draft_history",
+      "game_summary",
+      "team_history",
+      "team_info_common",
+      "draft_combine_stats"
+    ],
+    "3": [
+      "game_info",
+      "player",
+      "play_by_play",
+      "team_details",
+      "team",
+      "game",
+      "inactive_players",
+      "common_player_info",
+      "draft_combine_stats",
+      "team_info_common",
+      "team_history",
+      "game_summary",
+      "draft_history",
+      "officials",
+      "other_stats",
+      "line_score"
+    ]
+  },
+  "verdicts": {
+    "wrong": 13,
+    "error": 8,
+    "subset": 4,
+    "refusal_correct": 3,
+    "exact": 2
+  },
+  "stability": {
+    "verdict_changed": 5,
+    "pass_changed": 1,
+    "cases": {
+      "all-star-average-score": {
+        "passes": 0,
+        "attempts": 3,
+        "verdicts": [
+          "wrong",
+          "wrong",
+          "wrong"
+        ]
+      },
+      "all-star-game-count": {
+        "passes": 0,
+        "attempts": 3,
+        "verdicts": [
+          "wrong",
+          "wrong",
+          "wrong"
+        ]
+      },
+      "attendance-leader-2014-15": {
+        "passes": 0,
+        "attempts": 3,
+        "verdicts": [
+          "subset",
+          "error",
+          "wrong"
+        ]
+      },
+      "best-home-record-1996-97": {
+        "passes": 2,
+        "attempts": 3,
+        "verdicts": [
+          "exact",
+          "wrong",
+          "exact"
+        ]
+      },
+      "biggest-improvements": {
+        "passes": 0,
+        "attempts": 3,
+        "verdicts": [
+          "subset",
+          "error",
+          "error"
+        ]
+      },
+      "fewest-points-in-a-quarter-2018-19": {
+        "passes": 0,
+        "attempts": 3,
+        "verdicts": [
+          "error",
+          "error",
+          "error"
+        ]
+      },
+      "lakers-ppg-2022-23": {
+        "passes": 0,
+        "attempts": 3,
+        "verdicts": [
+          "wrong",
+          "wrong",
+          "wrong"
+        ]
+      },
+      "player-salary-refusal": {
+        "passes": 3,
+        "attempts": 3,
+        "verdicts": [
+          "refusal_correct",
+          "refusal_correct",
+          "refusal_correct"
+        ]
+      },
+      "single-game-scoring-high-2015-16": {
+        "passes": 0,
+        "attempts": 3,
+        "verdicts": [
+          "error",
+          "wrong",
+          "error"
+        ]
+      },
+      "top-rebounding-teams-1982-83": {
+        "passes": 0,
+        "attempts": 3,
+        "verdicts": [
+          "wrong",
+          "subset",
+          "subset"
+        ]
+      }
+    }
+  }
+}

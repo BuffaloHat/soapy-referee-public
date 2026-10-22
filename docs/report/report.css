@@ -1,0 +1,127 @@
+/* Print stylesheet for SREF's PDFs (eval report, Technical Reference). From raglab.
+   Pipeline: pandoc (md -> self-contained HTML) -> Chrome headless --print-to-pdf.
+   The report's own embedded <style> block owns .report-header and .chapter-break;
+   this file owns page geometry, typography, tables, figures, and callouts. */
+
+@page { size: Letter; margin: 0.9in 0.85in; }
+
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+body {
+  font-family: "Charter", "Georgia", "Times New Roman", serif;
+  font-size: 11pt;
+  line-height: 1.5;
+  color: #1a1a1a;
+  margin: 0;
+  max-width: none;
+}
+
+/* --- Headings (sans, to contrast the serif body) --- */
+h1, h2, h3, h4 {
+  font-family: "Helvetica Neue", "Arial", sans-serif;
+  line-height: 1.25;
+  color: #111;
+}
+h2 {
+  font-size: 16pt;
+  margin: 1.5em 0 0.5em;
+  padding-bottom: 0.2em;
+  border-bottom: 2px solid #dde2e8;
+}
+h3 { font-size: 12.5pt; margin: 1.2em 0 0.35em; color: #1f2937; }
+h4 { font-size: 11pt; margin: 1em 0 0.3em; color: #1f2937; }
+
+p { margin: 0.55em 0; }
+
+a { color: #1a4f8b; text-decoration: none; }
+
+/* --- Code --- */
+code {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 0.85em;
+  background: #f3f4f6;
+  padding: 0.1em 0.32em;
+  border-radius: 3px;
+}
+
+/* Code blocks: one shaded box, not a shaded strip per line. */
+pre {
+  background: #f3f4f6;
+  padding: 0.7em 0.9em;
+  border-radius: 4px;
+  font-size: 8.5pt;
+  line-height: 1.45;
+  white-space: pre;
+  overflow: hidden;
+}
+pre code { background: none; padding: 0; font-size: inherit; }
+
+/* --- Tables (the per-query score grids) --- */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.8em 0;
+  font-size: 9pt;
+}
+th, td {
+  border: 1px solid #ccd2d9;
+  padding: 4px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+thead th {
+  background: #eef2f6;
+  font-family: "Helvetica Neue", "Arial", sans-serif;
+  font-weight: 600;
+}
+tbody tr:nth-child(even) { background: #f8f9fb; }
+
+/* --- Figures --- */
+img { max-width: 100%; height: auto; display: block; margin: 0.7em auto; }
+
+/* --- Callouts / quoted field-cards --- */
+blockquote {
+  margin: 0.9em 0;
+  padding: 0.5em 1em;
+  border-left: 4px solid #b9c6d6;
+  background: #f6f8fa;
+  color: #2a2a2a;
+}
+blockquote p { margin: 0.3em 0; }
+
+/* --- Lists --- */
+ul, ol { margin: 0.5em 0 0.5em 1.3em; }
+li { margin: 0.25em 0; }
+
+/* --- Pagination hygiene --- */
+img, table, blockquote { break-inside: avoid; page-break-inside: avoid; }
+h2, h3, h4 { break-after: avoid; }
+
+/* A forced page break. The eval report runs in one flow and uses none; the
+   Technical Reference breaks before each section. */
+.chapter-break { break-before: page; }
+
+/* --- Technical Reference: title page and section headings --- */
+.title-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 8.5in;
+}
+.title-page-title {
+  font-family: "Charter", "Georgia", serif;
+  font-size: 34pt;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.title-page-image { margin: 2em 0; }
+.title-page-image img { max-width: 55%; }
+.title-page-author { font-size: 16pt; margin-top: 4em; }
+h1 {
+  font-size: 20pt;
+  margin: 0 0 0.6em;
+  padding-bottom: 0.25em;
+  border-bottom: 3px solid #1f2937;
+}

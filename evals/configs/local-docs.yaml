@@ -1,0 +1,14 @@
+# Same model and prompt as local-columns, with the fuller schema docs.
+# The only difference is schema_mode, so a verdict delta is attributable.
+name: local-docs
+model: qwen2.5-coder:14b
+prompt_version: v1
+schema_mode: docs
+temperature: 0.0
+seed: 0
+repeats: 1
+perturbation: none
+max_output_tokens: 512
+# Must comfortably exceed the rendered schema block; Ollama truncates silently.
+num_ctx: 32768
+notes: Treatment arm against local-columns.

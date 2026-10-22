@@ -1,0 +1,18 @@
+# The Phase 7 comparison arm: local-docs-r3 with an OpenAI model in qwen's place.
+# Same prompt, schema, seed, attempts and perturbation; three settings differ,
+# each forced by the model rather than chosen.
+name: openai-docs-r3
+provider: openai
+model: gpt-6.1-sol
+prompt_version: v1
+schema_mode: docs
+# The only value this model accepts; 0 is rejected. Attempts can differ without
+# any perturbation, so its spread is not comparable to qwen's at 0.
+temperature: 1.0
+seed: 0
+repeats: 3
+perturbation: table_order
+# Hidden reasoning shares this cap with the answer. qwen's 512 could be spent
+# on reasoning alone and leave no SQL.
+max_output_tokens: 4096
+notes: Comparison arm for local-docs-r3. num_ctx does not apply to OpenAI.

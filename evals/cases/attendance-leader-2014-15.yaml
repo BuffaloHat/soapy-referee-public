@@ -1,0 +1,75 @@
+id: attendance-leader-2014-15
+question: In the 2014-15 regular season, which team had the highest average home attendance, and how far ahead of the second-highest team was it?
+
+tier: trap
+traps: [coverage-gap, season-encoding]
+expects: rows
+cardinality: 1
+
+# Attendance lives in game_info, joined to game for the home team and season.
+# Rank teams by average home attendance, then put #1 and #2 side by side.
+# game_info is missing some games; averages are over games with a recorded
+# attendance — the only average the snapshot supports.
+gold_sql: |
+  WITH home_attendance AS (
+      SELECT g.team_id_home AS team_id,
+             avg(gi.attendance) AS avg_attendance
+      FROM nba.game g
+      JOIN nba.game_info gi ON gi.game_id = g.game_id
+      WHERE g.season_id = '22014'
+      GROUP BY g.team_id_home
+  ),
+  ranked AS (
+      SELECT team_id, avg_attendance,
+             ROW_NUMBER() OVER (ORDER BY avg_attendance DESC) AS rnk
+      FROM home_attendance
+  )
+  SELECT top.team_id AS top_team,
+         top.avg_attendance AS top_avg,
+         second.team_id AS second_team,
+         second.avg_attendance AS second_avg,
+         top.avg_attendance - second.avg_attendance AS lead
+  FROM ranked top
+  JOIN ranked second ON top.rnk = 1 AND second.rnk = 2
+
+# Same answer without window functions: the maximum, then the best of the rest.
+check_sql: |
+  WITH home_attendance AS (
+      SELECT g.team_id_home AS team_id,
+             sum(gi.attendance) / count(gi.attendance) AS avg_attendance
+      FROM nba.game_info gi
+      JOIN nba.game g ON g.game_id = gi.game_id
+      WHERE g.season_id = '22014'
+      GROUP BY g.team_id_home
+  ),
+  top AS (
+      SELECT team_id, avg_attendance FROM home_attendance
+      WHERE avg_attendance = (SELECT max(avg_attendance) FROM home_attendance)
+  ),
+  runner_up AS (
+      SELECT team_id, avg_attendance FROM home_attendance
+      WHERE avg_attendance = (
+          SELECT max(avg_attendance) FROM home_attendance
+          WHERE team_id NOT IN (SELECT team_id FROM top)
+      )
+  )
+  SELECT t.team_id, t.avg_attendance, r.team_id, r.avg_attendance,
+         t.avg_attendance - r.avg_attendance
+  FROM top t CROSS JOIN runner_up r
+
+contract:
+  decimals: 0
+  teams: [top_team, second_team]
+
+provenance: >
+  Two independent queries agree: Chicago ~21,878 per game, Cleveland ~20,562,
+  a lead of ~1,316. The leader matches the published record — the Bulls led
+  the NBA in home attendance through the mid-2010s. The averages come from the
+  games game_info records, so they differ slightly from published figures;
+  the snapshot is the ground truth.
+
+notes: >
+  2014-15 was chosen for a clear margin. In 2022-23 the top two are 12 fans
+  apart, close enough that the missing game_info rows decide the answer.
+  Averages over recorded games only: an average that counts games with no
+  recorded attendance as zero is wrong.

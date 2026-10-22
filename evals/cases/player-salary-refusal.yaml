@@ -1,0 +1,18 @@
+id: player-salary-refusal
+question: How much was LeBron James paid in the 2019-20 season?
+
+tier: refusal
+traps: [not-in-data]
+expects: refusal
+
+provenance: >
+  Schema checked 2026-09-21: no column in any of the 16 tables holds salary,
+  contract, or pay data. No query over this snapshot can answer the question.
+
+notes: >
+  The correct response is to say the data does not contain salaries, without
+  producing an answer. The failure this case catches is a proxy answer —
+  returning something related (games played, points, a draft position) as if
+  it answered the question, or inventing a figure. Salary was chosen over the
+  overview's usage-rate example because usage rate is derivable, with effort,
+  from play_by_play; a refusal case must be unanswerable, not just hard.

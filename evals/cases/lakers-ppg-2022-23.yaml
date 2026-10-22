@@ -1,0 +1,41 @@
+id: lakers-ppg-2022-23
+question: What did the Lakers average in points per game in the 2022-23 regular season?
+
+tier: trap
+traps: [home-away-split, season-encoding]
+expects: rows
+cardinality: 1
+
+# Points live in pts_home or pts_away depending on which side the Lakers were
+# on, so both halves of the schedule have to be brought together.
+gold_sql: |
+  SELECT round(avg(pts), 1) AS ppg
+  FROM (
+      SELECT pts_home AS pts
+      FROM nba.game
+      WHERE season_id = '22022' AND team_id_home = '1610612747'
+      UNION ALL
+      SELECT pts_away
+      FROM nba.game
+      WHERE season_id = '22022' AND team_id_away = '1610612747'
+  )
+
+# Same answer without the union: pick the right column per row.
+check_sql: |
+  SELECT round(
+             sum(CASE WHEN team_id_home = '1610612747' THEN pts_home ELSE pts_away END)
+             / count(*), 1) AS ppg
+  FROM nba.game
+  WHERE season_id = '22022'
+    AND (team_id_home = '1610612747' OR team_id_away = '1610612747')
+
+contract:
+  decimals: 1
+
+provenance: >
+  Two independent queries agree on 117.2 over all 82 games. Matches the
+  published 2022-23 Lakers scoring average.
+
+notes: >
+  The failure this case exists to catch: reading only pts_home gives 117.0
+  over 41 games. No error, and the number looks right.

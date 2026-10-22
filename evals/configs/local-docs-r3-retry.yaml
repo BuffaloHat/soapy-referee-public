@@ -1,0 +1,15 @@
+# local-docs-r3 plus one retry when the agent's SQL fails.
+# Attempts as in local-docs-r3: table order shuffled from attempt 2 on.
+name: local-docs-r3-retry
+model: qwen2.5-coder:14b
+prompt_version: v1
+schema_mode: docs
+temperature: 0.0
+seed: 0
+repeats: 3
+perturbation: table_order
+max_output_tokens: 512
+# Must comfortably exceed the rendered schema block; Ollama truncates silently.
+num_ctx: 32768
+sql_retries: 1
+notes: Fix-loop arm. Identical to local-docs-r3 except sql_retries.

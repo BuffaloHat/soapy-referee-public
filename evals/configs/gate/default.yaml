@@ -1,0 +1,11 @@
+# The regression gate's settings: how far a run may fall below its baseline.
+name: default
+# Percentage points of pass rate, over all attempts. 10 is about 3 of 30 case
+# attempts: on 2026-10-15 sol crossed the pass line in 3 of 10 cases between
+# attempts, with nothing changed. A smaller margin would fail on noise.
+margin_points: 10
+# The run each config is held to; both are included in runs/. Re-pin here
+# when a change is accepted as the new normal.
+baselines:
+  local-docs-r3: 20261015-220144-local-docs-r3
+  openai-docs-r3: 20261015-215958-openai-docs-r3

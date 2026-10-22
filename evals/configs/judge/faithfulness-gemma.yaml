@@ -1,0 +1,12 @@
+# The faithfulness judge: gemma grades the agent's prose against its rows.
+name: faithfulness-gemma
+model: gemma4:12b
+prompt_version: v1
+temperature: 0.0
+seed: 0
+# The judge sees a question, at most five rows and two sentences.
+num_ctx: 8192
+# gemma reasons before its two-line reply, out of sight, and the reasoning
+# counts against this cap. At 1024 a hard item (a rounding check) was cut off
+# with an empty reply; it needed 2140.
+max_output_tokens: 4096

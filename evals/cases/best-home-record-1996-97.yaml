@@ -1,0 +1,53 @@
+id: best-home-record-1996-97
+question: >
+  Which team had the best home record in the 1996-97 season, and how many
+  home wins did they have?
+
+tier: baseline
+traps: [season-encoding]
+expects: rows
+cardinality: 1
+
+# The answer: the team, plus its home wins. team_id identifies the team;
+# abbreviations change when franchises move.
+gold_sql: |
+  SELECT team_id_home,
+         count(*) FILTER (WHERE wl_home = 'W') AS home_wins
+  FROM nba.game
+  WHERE season_id = '21996'
+  GROUP BY team_id_home
+  ORDER BY home_wins DESC
+  LIMIT 1
+
+# Same answer from the scores instead of the win/loss flag.
+check_sql: |
+  WITH home_games AS (
+      SELECT team_id_home AS team,
+             CASE WHEN pts_home > pts_away THEN 1 ELSE 0 END AS won
+      FROM nba.game
+      WHERE season_id = '21996'
+  )
+  SELECT team, sum(won) AS wins
+  FROM home_games
+  GROUP BY team
+  ORDER BY wins DESC
+  LIMIT 1
+
+contract:
+  ordered: true
+  teams: [team_id_home]
+
+provenance: >
+  Published record — Chicago went 39-2 at home in 1996-97, the second-best
+  home record in NBA history. No tie at the top (UTA 38-3 was second).
+
+notes: >
+  Baseline case. The trap is the season encoding: '21996' means regular
+  season 1996-97, and a query written as season_id = '1996-97' returns no
+  rows at all.
+
+  The question asks for the win count as well as the team (rule 12). It
+  originally asked only "which team", while gold returned both columns — so
+  on 2026-09-22 the agent answered 'CHI', the right team, and scored wrong
+  for omitting a column the question never requested. The win count also
+  keeps the case tied to the published 39-2.

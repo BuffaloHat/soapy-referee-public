@@ -1,0 +1,20 @@
+# What the eval report (Phase 8) is built from. `uv run python -m evals.report`
+# fills the template's {{placeholders}} from these runs; the narrative around
+# them is hand-written. These four runs are included in runs/; the other
+# runs from the build are not.
+template: docs/report/sref_eval_template.md
+output: docs/sref_eval_report.md
+
+# The comparison: same cases, same attempts, one model each.
+arms:
+  - label: qwen
+    run: 20261015-220144-local-docs-r3
+  - label: sol
+    run: 20261015-215958-openai-docs-r3
+    # Per million tokens, from OpenAI's pricing page on 2026-10-15.
+    price: {input: 2.00, cached_input: 0.10, output: 10.00}
+
+# Phase 6: the judge's verdicts against the human labels.
+judge_run: 20261013-193133-local-docs-r3-answer
+# Phase 5: the failure taxonomy, labelled on this run.
+taxonomy_run: 20261005-211049-local-docs-r3

@@ -1,0 +1,14 @@
+# Baseline: the agent sees a plain column list and nothing else.
+# The control arm for "does documentation help?".
+name: local-columns
+model: qwen2.5-coder:14b
+prompt_version: v1
+schema_mode: columns
+temperature: 0.0
+seed: 0
+repeats: 1
+perturbation: none
+max_output_tokens: 512
+# Must comfortably exceed the rendered schema block; Ollama truncates silently.
+num_ctx: 32768
+notes: Development baseline. Local Ollama, greedy decoding.

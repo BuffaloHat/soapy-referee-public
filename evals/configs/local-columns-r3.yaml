@@ -1,0 +1,14 @@
+# local-columns, three attempts, table order shuffled from attempt 2 on.
+# Measures how often a verdict moves under a change that alters no fact.
+name: local-columns-r3
+model: qwen2.5-coder:14b
+prompt_version: v1
+schema_mode: columns
+temperature: 0.0
+seed: 0
+repeats: 3
+perturbation: table_order
+max_output_tokens: 512
+# Must comfortably exceed the rendered schema block; Ollama truncates silently.
+num_ctx: 32768
+notes: Noise-floor arm for local-columns. Attempt 1 is identical to it.

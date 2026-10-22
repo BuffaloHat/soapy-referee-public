@@ -1,0 +1,30 @@
+# secrets
+.env
+.env.local
+
+# data — the SQLite snapshot is large and is NOT source
+# (*.duckdb kept in case a slow table is ever materialized)
+*.sqlite
+*.duckdb
+*.duckdb.wal
+data/
+
+# python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# eval output — only the runs the report is built from are kept
+runs/*
+!runs/20261015-220144-local-docs-r3/
+!runs/20261015-215958-openai-docs-r3/
+!runs/20261013-193133-local-docs-r3-answer/
+!runs/20261005-211049-local-docs-r3/
+.langfuse/
+.phoenix/
+
+# os
+.DS_Store
+
